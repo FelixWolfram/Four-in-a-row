@@ -48,6 +48,12 @@ def check_for_winner(board_height, board_width, board, next_free_row):
             if r - c > -1:
                 if (player_won := loop_over_board(c, r - c, count, board)) != 0:
                     return player_won
+    # two rows are still in blind spots by the four diagonal checks
+    if board[5][3] == board[4][4] == board[3][5] == board[2][6] != 0:
+        return -1 if board[4][4] == 1 else 1
+    if board[5][2] == board[4][3] == board[3][4] == board[2][5] != 0 or \
+       board[4][3] == board[3][4] == board[2][5] == board[1][6] != 0:
+       return -1 if board[3][4] == 1 else 1
     return 0
 
 def loop_over_board(r, c, count, board):
