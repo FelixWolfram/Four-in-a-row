@@ -1,9 +1,7 @@
 import copy
-
 from customtkinter import *     # like this you don't have to put customtkinter. in front of all the classes and methods
 from check_for_winner import check_for_winner
 from enemy import Computer
-from PIL import Image, ImageTk
 
 
 class GUI:
@@ -20,21 +18,40 @@ class GUI:
         self.board_frame = None
         self.board_height = 6
         self.board_width = 7
-        self.board = [[0 for _ in range(self.board_width)] for _ in range(self.board_height)]
+        #self.board = [[0 for _ in range(self.board_width)] for _ in range(self.board_height)]
+        #self.next_free_row = {0 : self.board_height - 1, 1 : self.board_height - 1, 2 : self.board_height - 1, 3 : self.board_height - 1,
+        #                      4 : self.board_height - 1, 5 : self.board_height - 1, 6 : self.board_height - 1}
+        self.board = [  [0, 0, 0, 2, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0, 0],
+                        [0, 0, 1, 2, 0, 1, 0],
+                        [0, 1, 2, 1, 0, 2, 0],
+                        [0, 1, 1, 2, 0, 1, 0],
+                        [2, 2, 2, 1, 0, 1, 2]]
+        self.next_free_row = {0: 4, 1: 2, 2: 1, 3: -1, 4: 5, 5: 1, 6: 4}
         self.buttons = [[None for _ in range(self.board_width)] for _ in range(self.board_height)]
         self.button_border_width = 10   # variable for that, because it is used several times
         self.button_total_height = 0
         self.used_buttons = set()
         self.chip_label = None
         self.computer = Computer(self.board_height, self.board_width)
-        self.next_free_row = {0 : self.board_height - 1, 1 : self.board_height - 1, 2 : self.board_height - 1, 3 : self.board_height - 1,
-                              4 : self.board_height - 1, 5 : self.board_height - 1, 6 : self.board_height - 1}
-                                # for every col, first set last used row to under the board
+
         self.player1 = True
         self.player_turn_label = None
         self.invalid_move_label = None
         self.create_GUI()
+        self.draw_board()   # NUR VORRÜBERGEHEND
         self.print_player()
+
+
+    def draw_board(self):
+        for r in range(self.board_height):
+            for c in range(self.board_width):
+                if self.board[r][c] == 1:
+                    self.buttons[r][c].configure(fg_color=self.colors["chip_col1"])  # change the button
+                    self.used_buttons.add((r, c))
+                elif self.board[r][c] == 2:
+                    self.buttons[r][c].configure(fg_color=self.colors["chip_col2"])  # change the button
+                    self.used_buttons.add((r, c))
 
 
     def create_GUI(self):
@@ -79,6 +96,9 @@ class GUI:
 
 
     def set_chip(self, col):
+        # NEUE ANIMATIONS IDEE --> NICHT MEHR LAUFEND ÄNDERN, SONDERN NUR NOCH DIE EINZELNEN FELDER NACH UND NACH
+        # NACH UNTEN EINMAL KURZ BELEUCHTEN --> SOZUSAGEN STOP MOTION ANIMATION FÜR DEN CHIP
+
         self.invalid_move_label.configure(text="")
         if self.next_free_row[col] < 0:
             self.invalid_move_label.configure(text="Invalid Move, Row is full!")    # text if row is full
@@ -94,7 +114,7 @@ class GUI:
             self.chip_label.place(x=x_coord_chip, y=y_coord_chip)
             # get button coordinates of the "next free button" in that row
             y_coord = self.buttons[self.next_free_row[col]][col].winfo_y() # next free row y-coord
-            move_y = self.button_total_height / 40  # how much the label should move per recursion
+            move_y = self.button_total_height / 50  # how much the label should move per recursion
             # disable all buttons, animate chip, then enable all buttons again
             self.disable_buttons()
             self.animate_chip(x_coord_chip, y_coord_chip, y_coord, move_y)
@@ -113,24 +133,14 @@ class GUI:
 
 
     def computer_move(self):
-        # MAN KANN DIE KOMPLETTE METHODE STARK KÜRZEN, WENN MAN EINFACH EINE ABFRAGE, WELCHER SPIELER DRAN IST UNTEN BEIM
-        # "COMPUTER_MOVE" (DAMIT NICHT IMMER DER COMPUTER AM ZUG IST) DAZUMACHT UND DANN DEN CHIP AN DIE METHODE
-        # "SET_CHIP()" ÜBERGIBT --> ALLERDINGS IST DIE ANIMATION DANN VERBUGGT; WEIL EINFACH EIN CHIP IRGENDWO IN DER LUFT HÄNGT
-        # --> GGF. KÖNNTE MAN DAS ÄNDERN INDEM MAN DEN CHIP KOMPLETT UNSICHTBAR MACHT, NACHDEM DIE ANIMATION FERTIG IST
-        # --> DANN MÜSSTE NUR NOCH DAS PROBLEM GEFIXT WERDEN, DASS DER CHIP DIE FARBE WÄHREND DER ANIMATION ÄNDERT
-            # --> AUF JEDEN FALL MAL SCHAUEN, OB PYTHON EINE "SLEEP" METHODE HAT (GIBTS AUF JEDEN FALL)
         if self.player1:
             chip_col = self.colors["chip_col1"]  # save color for the "chip"
         else:
             chip_col = self.colors["chip_col2"]
 
-
-        # FUNKTIONIERT NOCH NICHT, WEIL:
-        # DER COMPUTER SETZT DIE CHIPS IMMER NUR IN DIE ERSTE REIHE
-        # AUCH DIE ENDANZEIGE STIMMT NOCH NICHT GANZ, DA NACH DEM 4. CHIP IN EINER REIHE DES SPIELERS DER COMPUTER
-            # SOZUSAGEN AUCH NOCHMAL EIN CHIP SETZT UND ANGEZEIGT WIRD, DASS DER COMPUTER GEWONNEN HAT
-        place_col = self.computer.computer_move(copy.deepcopy(self.board), self.player1, self.next_free_row.copy())
+        place_col = self.computer.computer_move(copy.deepcopy(self.board), self.player1, self.next_free_row.copy(), len(self.used_buttons))
                                     # deepcopy, because with nested lists, the normal ".copy()" method only copies the outer list
+
         self.board[self.next_free_row[place_col]][place_col] = 1 if self.player1 else 2  # enter "1" for player 1, "2" for player 2
         self.buttons[self.next_free_row[place_col]][place_col].configure(fg_color=chip_col)  # change the button
         self.used_buttons.add((self.next_free_row[place_col], place_col))
@@ -181,20 +191,19 @@ root.title("4 Gewinnt")
 root.geometry("900x900")
 root._set_appearance_mode("dark")
 
-
 main = GUI(root)
 
 root.mainloop()
 
 
 # TODO
-# bot hinzufügen
 # Schwierigkeitsanpassung für Bot hinzufügen --> mit Schiebregler
+# Neue Animationen für die Chips (eine Art Stop Motion machen) --> dann die beiden Funktionen für Spieler und Computer
+    # mehr zusammensetzen
 # design ändern
 # UI für Restart, ...
     # für UI diesmal vielleicht anderer aufbau mit einem Container links davon
     # auch andere Buttons und Menus mal austesten
-# runde Felder???
 # warum auch immer das nötig wäre, aber ein passwortgeschützer Admin Mode :)
 # Animationen für die "Chips" wenns geht
 # Benutzer entscheiden lassen, welcher Spieler er sein will gegen den Computer (1 oder 2)
