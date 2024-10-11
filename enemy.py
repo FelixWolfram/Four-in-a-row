@@ -10,9 +10,6 @@ class Computer:
         self.recursion_depth = 0
         self.max_recursion_depth = 7
 
-    # ES KÖNNTEN AKTUELL PROBLEME GEGEGEN ENDE MIT VOLLEM BOARD AUFTAUCHEN, WEIL:
-    # WENN SO WEIT BERECHENT WIRD, DASS ES EIN VOLLES BOARD GIBT, WIRD NICHTS MEHR IN DIE LISTE EINGETRAGEN
-    # --> ES KÖNNTE EIN ERROR GEBEN, DA VERSUCHT WIRD MIN() AUF EINE LEERE LISTE ANZUWENDEN
 
     def computer_move(self, board, player1, nfrs: dict, chip_nums):  # nfrs = next free rows
         # set the first chip always in the middle --> returns draw for every column anyway and middle is the best
@@ -167,4 +164,3 @@ if __name__ == "__main__":   # only executed when run as a script
 #             [   2,     0,    0,    0,    0,    1,    1],
 #             [   2,     0,    0,    1,    2,    1,    1]]
 #    nfrs =   {0: -1, 1: 5, 2: 5, 3: 4, 4: 4, 5: 1, 6: 1}
-
