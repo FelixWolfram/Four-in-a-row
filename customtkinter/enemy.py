@@ -139,10 +139,6 @@ class Computer:
             self.memo[str(board) + str(player1)] = result
 
 
-    def save_before_return(self, board, player1, result):
-        if str(board) + str(player1) not in self.memo:
-            self.memo[str(board) + str(player1)] = result
-
 
 if __name__ == "__main__":   # only executed when run as a script
     board = [[   0,    0,    0,    0,    0,    0,    0],
