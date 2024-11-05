@@ -7,8 +7,6 @@ import threading
 from copy import deepcopy
 
 
-# add Difficulty, Sound, ...
-
 class Game:
     def __init__(self):
         self.win = pygame.display.set_mode((Info.WIN_WIDTH, Info.WIN_HEIGHT))
