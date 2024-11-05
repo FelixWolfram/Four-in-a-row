@@ -39,78 +39,31 @@ class Board:
     
 
     def check_for_winner(self, next_free_row, board):
-        draw = True
-        for c in range(Info.cols):  # check for draw --> no fields left
-            if next_free_row[c] > -1:  # if not all check_for_free pointers are "over" the board --> game not ended
-                draw = False
-                break
-        if draw:
-            return 3    # 3 for draw
+        # Überprüfen auf Unentschieden
+        if all(row == -1 for row in next_free_row):
+            return 3  # draw
 
-        # check rows
-        for r in range(Info.rows):
-            count = [0, 0]  # first number for player1, second for player2
-            for c in range(Info.cols):
-                if (player_won := self.loop_over_board(r, c, count, board)) != 0:    # player_won = 0 if the first player won, 1 if the second player won
-                    return player_won
+        # check for row, columns and diagonals
+        for r in range(len(board)):
+            for c in range(len(board[0])):
+                if board[r][c] != 0:  # only check fields that are not empty
+                    # horizontal
+                    if c <= len(board[0]) - 4 and all(board[r][c] == board[r][c + i] for i in range(4)):
+                        return -1 if board[r][c] == 1 else 1
 
-        # check columns
-        for c in range(Info.cols):
-            count = [0, 0]
-            for r in range(Info.rows):
-                if (player_won := self.loop_over_board(r, c, count, board)) != 0:
-                    return player_won
+                    # vertical
+                    if r <= len(board) - 4 and all(board[r][c] == board[r + i][c] for i in range(4)):
+                        return -1 if board[r][c] == 1 else 1
 
-        # check diagonals -> there is probably a better way to do this
-        for r in range(Info.rows - 3):
-            count = [0, 0]
-            for c in range(Info.cols):  # we don't have to check the last 3 rows/columns, because there can't be 4 chips diagonally
-                if r + c < Info.rows:
-                    if (player_won := self.loop_over_board(r + c, c, count, board)) != 0:
-                        return player_won
-        for r in range(Info.rows - 1, 2, -1):
-            count = [0, 0]
-            for c in range(Info.cols):
-                if r - c > -1:
-                    if (player_won := self.loop_over_board(r - c, c, count, board)) != 0:
-                        return player_won
-        for r in range(Info.cols - 3):
-            count = [0, 0]
-            for c in range(Info.rows):
-                if r + c < Info.cols:
-                    if (player_won := self.loop_over_board(c, r + c, count, board)) != 0:
-                        return player_won
-        for r in range(Info.cols - 1, 2, -1):
-            count = [0, 0]
-            for c in range(Info.rows):
-                if r - c > -1:
-                    if (player_won := self.loop_over_board(c, r - c, count, board)) != 0:
-                        return player_won
-        # two rows are still in blind spots by the four diagonal checks
-        if board[5][3] == board[4][4] == board[3][5] == board[2][6] != 0:
-            return -1 if board[4][4] == 1 else 1
-        if board[5][2] == board[4][3] == board[3][4] == board[2][5] != 0 or \
-           board[4][3] == board[3][4] == board[2][5] == board[1][6] != 0:
-            return -1 if board[3][4] == 1 else 1
-        return 0
+                    # diagonal from top left to bottom right
+                    if r <= len(board) - 4 and c <= len(board[0]) - 4 and all(board[r][c] == board[r + i][c + i] for i in range(4)):
+                        return -1 if board[r][c] == 1 else 1
 
+                    # diagonal from top right to bottom left
+                    if r >= 3 and c <= len(board[0]) - 4 and all(board[r][c] == board[r - i][c + i] for i in range(4)):
+                        return -1 if board[r][c] == 1 else 1
 
-    def loop_over_board(self, r, c, count, board): # incrementing the count if adjacent chips are the same
-        if board[r][c] == 1:
-            count[0] += 1
-            count[1] = 0
-        elif board[r][c] == 2:
-            count[0] = 0
-            count[1] += 1
-        else:  # if a 0 was found
-            count[0] = 0
-            count[1] = 0
-        if 4 in count:
-            if count.index(4) == 0:  # index = 0 if the first player won, 1 if the second player won
-                return -1   # -1, if player1 won
-            else:
-                return 1    # 1, if player2 won
-        return 0
+        return 0  # Kein Gewinner
 
 
     def draw(self, win):

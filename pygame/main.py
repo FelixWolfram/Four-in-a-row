@@ -1,17 +1,13 @@
 import pygame
 from board import Board
-from computer import Computer
+from minimax_pruning import Computer
 from start_gui import StartGui
 from help import Info
 import threading
 from copy import deepcopy
 
 
-# Computer mit BFS statt DFS implementieren
-# shorten check_for_winner-method -> mehtod which takes a starting point and a direction and checks for a winner
-# Difficulty, Sound, ...
-# TODO anscheinend verwende ich nicht die Implementierung des Alpha-Beta-Prunings -> implementieren (und nachschauen, was der Unterschied ist)
-
+# add Difficulty, Sound, ...
 
 class Game:
     def __init__(self):
